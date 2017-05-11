@@ -2,35 +2,46 @@
 
 import sys
 import os
+from hashlib import sha256
 
 #
 # _____________________________________________________________________________
 #
 def main(argv):
 
+    files = argv
+
     hashes = set()
 
     N = 0
+    n = 0
+    X = 0
 
-    for fname in argv:
+    for fname in files:
 
-        abspath = os.path.abspath(fname)
+        for line in open(fname):
 
-        dataset = abspath.split('/')[-3]
+            tokens = line.strip().split(':')
+            if not tokens:
+                continue
+            myhex = tokens[0]
+            myrest = ':'.join(tokens[1:])
 
-        for line in open(abspath):
-            (myid, myhash) = line.split(':')[:2]
             N += 1
- 
-            myhash = myhash.strip()
+
+            if (len(myhex) % 2) != 0:
+                X += 1
+                continue
+
+            myhash = sha256(myhex.decode("hex")).hexdigest()
 
             if myhash not in hashes:
                 hashes.update([myhash])
-                fullid = dataset + ':' + myid.split('~')[0]
-                print(fullid)
+                n += 1
 
-#    print('Found {0} stimuli ({1} unique)'.format(N, len(hashes)))
-
+    print(N)
+    print(n)
+    print(X)
 
 #
 # _____________________________________________________________________________
