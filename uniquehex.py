@@ -39,14 +39,17 @@ def main(argv):
     if len(argv) < 1:
         return
 
-    if argv[0] == '-d':
-        flagd = True
-        files = argv[1:]
-    else:
-        flagd = False
-        files = argv
+    for i, arg in enumerate(argv):
+        if not arg.startswith('-'):
+            argFileIndex = i
+            break   
 
+    args = argv[:argFileIndex]
+    files = argv[argFileIndex:]
     hashes = set()
+
+    flagd = '-d' in args
+    flago = '-o' in args
 
     nTotal = 0
     nAccepted = 0
@@ -58,20 +61,23 @@ def main(argv):
         nFileTotal = 0
         nFileAccepted = 0
 
-        fAccepted = open(fname + '.accepted', 'w')
-        fRejected = open(fname + '.rejected', 'w')
-
-        if not fAccepted or not fRejected:
-            print('Failed to write output file')
-            continue
+        fAccepted = None
+        fRejected = None
+        if flago:
+            fAccepted = open(fname + '.accepted', 'w')
+            fRejected = open(fname + '.rejected', 'w')
+            print(' => ' + fname + '.accepted')
+            print(' => ' + fname + '.rejected')
 
         for line in open(fname):
             nFileTotal += 1
             if accept(line, hashes, flagd):
                 nFileAccepted += 1
-                fAccepted.write(line)
+                if flago:                
+                    fAccepted.write(line)
             else:
-                fRejected.write(line)
+                if flago:                
+                    fRejected.write(line)
 
         print(' -> Total   : {0}'.format(nFileTotal))
         print(' -> Accepted: {0}'.format(nFileAccepted))
