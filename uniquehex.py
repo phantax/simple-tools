@@ -48,8 +48,8 @@ def main(argv):
     files = argv[argFileIndex:]
     hashes = set()
 
-    flagd = '-d' in args
-    flago = '-o' in args
+    flagd = '-d' in args    # use de-randomization?
+    flago = '-o' in args    # write output files?
 
     nTotal = 0
     nAccepted = 0
@@ -64,19 +64,28 @@ def main(argv):
         fAccepted = None
         fRejected = None
         if flago:
-            fAccepted = open(fname + '.accepted', 'w')
-            fRejected = open(fname + '.rejected', 'w')
-            print(' => ' + fname + '.accepted')
-            print(' => ' + fname + '.rejected')
+            fNameAccepted = fname + '.accepted'
+            if os.path.isfile(fNameAccepted):
+                print(' ->| already exists: ' + fNameAccepted)
+            else:
+                fAccepted = open(fNameAccepted, 'w')
+                print(' => ' + fNameAccepted)
+
+            fNameRejected = fname + '.rejected'
+            if os.path.isfile(fNameRejected):
+                print(' ->| already exists: ' + fNameRejected)
+            else:
+                fRejected = open(fNameRejected, 'w')
+                print(' => ' + fNameRejected)
 
         for line in open(fname):
             nFileTotal += 1
             if accept(line, hashes, flagd):
                 nFileAccepted += 1
-                if flago:                
+                if fAccepted is not None:                
                     fAccepted.write(line)
             else:
-                if flago:                
+                if fRejected is not None:           
                     fRejected.write(line)
 
         print(' -> Total   : {0}'.format(nFileTotal))
