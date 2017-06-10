@@ -34,9 +34,24 @@ def accept(line, hashes, flagd):
 #
 # _____________________________________________________________________________
 #
+def usage():
+
+    print('Usage: ./uniquehex.py [OPTIONS] FILES')
+    print('\nOptions:')
+    print('  -o     write output files')
+    print('  -d     derandomize ClientHello random')
+    print('  -t     trace the origin of lines in output files')
+    print('  -T     write trace files')
+    print('  -s     use short trace (omit filename)')
+
+
+#
+# _____________________________________________________________________________
+#
 def main(argv):
 
     if len(argv) < 1:
+        usage()
         return
 
     for i, arg in enumerate(argv):
@@ -50,6 +65,9 @@ def main(argv):
 
     flagd = '-d' in args    # use de-randomization?
     flago = '-o' in args    # write output files?
+    flagt = '-t' in args    # trace line origin in output files?
+    flagT = '-T' in args    # write trace files?
+    flagT = '-s' in args    # use short trace (omit filename)?
 
     nTotal = 0
     nAccepted = 0
@@ -78,10 +96,33 @@ def main(argv):
                 fRejected = open(fNameRejected, 'w')
                 print(' => ' + fNameRejected)
 
+        # Trace files
+        fTrace = None
+        if flagT:
+            fNameTrace = fname + '.trace'
+            if os.path.isfile(fNameTrace):
+                print(' ->| already exists: ' + fNameTrace)
+            else:
+                fTrace = open(fNameTrace, 'w')
+                print(' => ' + fNameTrace)
+
+        iLine = 0
         for line in open(fname):
+
             nFileTotal += 1
+
+            # Keep track of line numbers
+            iLine += 1
+
+            # Tracing origin
+            origin = '{0}#{1:08}'.format(fname, iLine)
+            if flagt:
+                line += ':{0}'.format(origin)
+
             if accept(line, hashes, flagd):
                 nFileAccepted += 1
+                if fTrace is not None:
+                    fTrace.write(origin)
                 if fAccepted is not None:                
                     fAccepted.write(line)
             else:
