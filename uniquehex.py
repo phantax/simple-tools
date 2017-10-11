@@ -67,7 +67,7 @@ def main(argv):
     flago = '-o' in args    # write output files?
     flagt = '-t' in args    # trace line origin in output files?
     flagT = '-T' in args    # write trace files?
-    flagT = '-s' in args    # use short trace (omit filename)?
+    flags = '-s' in args    # use short trace (omit filename)?
 
     nTotal = 0
     nAccepted = 0
@@ -109,6 +109,8 @@ def main(argv):
         iLine = 0
         for line in open(fname):
 
+            line = line.rstrip('\r\n')
+
             nFileTotal += 1
 
             # Keep track of line numbers
@@ -122,12 +124,12 @@ def main(argv):
             if accept(line, hashes, flagd):
                 nFileAccepted += 1
                 if fTrace is not None:
-                    fTrace.write(origin)
+                    fTrace.write(origin + '\n')
                 if fAccepted is not None:                
-                    fAccepted.write(line)
+                    fAccepted.write(line + '\n')
             else:
                 if fRejected is not None:           
-                    fRejected.write(line)
+                    fRejected.write(line + '\n')
 
         print(' -> Total   : {0}'.format(nFileTotal))
         print(' -> Accepted: {0}'.format(nFileAccepted))
